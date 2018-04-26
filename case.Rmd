@@ -59,9 +59,9 @@ sub %>%
 
 Liu et al., Quantitative variability of 342 plasma proteins in a human twin population, *Molecular Systems Biology*, 2015. [PMID: 25652787]
 
-* The dataset contains 232 MS runs of plasma samples:
-    - 58 pairs of monozygotic (MZ) and dizygotic (DZ) twins.
-    - 2 time points.
+* The dataset contains `r length(unique(twin_dia$run))` MS runs of plasma samples:
+    - `r length(unique(twin_dia$pair))` pairs of monozygotic (MZ) and dizygotic (DZ) twins.
+    - `r length(unique(twin_dia$visit))` time points.
     - $58 \times 2 \times 2 = 232$.
 
 * Data were acquired with MS workflows of:
@@ -94,7 +94,7 @@ head(twin_dia)
 class(twin_dia)
 ```
 
-A **data frame** contains **variables** (in the **columns**) and **observations** (in the **rows**) in a tabular form. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because
+A **data frame** contains **variables** (in the **columns**) and **observations** (in the **rows**) in a tabular form. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:
 
 * Data frame keeps together related values of variables (in a row).
 
@@ -398,7 +398,7 @@ sum_g <- aggregate(
 colnames(sum_g)[3] <- "log2inty"
 ```
 
-Saving grouped summaries in a data frame makes it easier to carry out statistical modeling and inference in subsequent analysis.
+Saving the grouped summaries in a data frame makes it easier to carry out statistical modeling and inference in subsequent analysis.
 
 
 # Task 4: fit a linear model to characterize summarized intensities

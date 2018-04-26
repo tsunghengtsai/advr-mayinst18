@@ -25,9 +25,9 @@ load("adv-R-twin.RData")
 
 Liu et al., Quantitative variability of 342 plasma proteins in a human twin population, *Molecular Systems Biology*, 2015. [PMID: 25652787]
 
-* The dataset contains 232 MS runs of plasma samples:
-    - 58 pairs of monozygotic (MZ) and dizygotic (DZ) twins.
-    - 2 time points.
+* The dataset contains `r length(unique(twin_dia$run))` MS runs of plasma samples:
+    - `r length(unique(twin_dia$pair))` pairs of monozygotic (MZ) and dizygotic (DZ) twins.
+    - `r length(unique(twin_dia$visit))` time points.
     - $58 \times 2 \times 2 = 232$.
 
 * Data were acquired with MS workflows of:
@@ -64,14 +64,14 @@ head(twin_srm)
 
 **Task 2:** comparison between DIA and SRM datasets, to evaluate their agreement in terms of protein quantification.
 
-We will discuss tools in the **tidyverse** to address the tasks. In particular, how to tidy up messy datasets, manipulate and transform data, carry out split-apply-combine approach, and join datasets in a consistent fashion.
+We will discuss tools in the **tidyverse** to address the tasks. In particular, how to tidy up messy datasets, manipulate and transform data, carry out the split-apply-combine approach, and join datasets in a consistent fashion.
 
 
 ```{r}
 library(tidyverse)
 ```
 
-The [tidyverse](http://tidyverse.org/) is a collection of R packages that share common data representation and [design principles](http://tidyverse.tidyverse.org/articles/manifesto.html). It is designed to make data analysis easier. `library(tidyverse)` loads six core packages: ggplot2, tibble, tidyr, readr, purrr, and dplyr. These packages provide functions that are involved in most data analysis projects. We will introduce core functions in **tidyr** and **dplyr**, and touch on a few aspects of tibble, purrr and ggplot2. There are other packages in the tidyverse focusing on different aspects of data analysis that you may find useful. For example, stringr for strings, and broom for model objects that we will also discuss. 
+The [tidyverse](http://tidyverse.org/) is a collection of R packages that share common data representation and [design principles](http://tidyverse.tidyverse.org/articles/manifesto.html). It is designed to make data analysis easier. `library(tidyverse)` loads eights core packages: ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats. These packages provide functions that are involved in most data analysis projects. We will introduce core functions in **tidyr** and **dplyr**, and touch on a few aspects of tibble, purrr and ggplot2. There are other packages in the tidyverse focusing on different aspects of data analysis that you may find useful. For example, stringr for strings, and broom for model objects that we will also discuss. 
 
 
 # Helpful conventions for data wrangling
@@ -96,7 +96,7 @@ twin_dia
 View(twin_dia)
 ```
 
-The **pipe operator** `%>%` to chain multiple operations: 
+The **pipe operator** `%>%` (from magrittr) to chain multiple operations: 
 
 ```{r, eval=FALSE}
 # Equivalent representations
@@ -224,7 +224,7 @@ To tidy this dataset, we need to spread the values of the `intensity` column, in
 sub2 %>% spread(key = label, value = intensity)
 ```
 
-In some cases, both `gather()` and `spread()` are needed for data tidying.
+In some cases, both `gather()` and `spread()` are needed for tidying up data.
 
 ```{r}
 sub12
@@ -404,12 +404,12 @@ twin_dia %>% mutate(log2inty_h = log2(intensity_h)) %>%
     mutate(log2inty_adj = median(log2inty_med) - log2inty_med)
 ```
 
-To address Task 1, we will then need to merge this summary back to the original data frame.
+To address **Task 1**, we will then need to merge this summary back to the original data frame.
 
 
 # Merge datasets
 
-All the figures in this section are from [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickham and Garrett Grolemund.
+Figures in this section are from [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickham and Garrett Grolemund.
 
 Consider two datasets `x` and `y`: 
 
