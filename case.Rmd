@@ -18,9 +18,9 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 2. Basic data analysis with tools in base R.
 
 
-# A typical MS-based proteomics experiment
+# A typical bottom-up MS-based proteomics experiment
 
-* Design: comparison of **protein** abundance between **groups** of interest (e.g., healthy vs. diseased subjects). 
+* Design: to compare **protein** abundance between **groups** of interest (e.g., healthy vs. diseased subjects). 
 
 * Measurements: **peptide features** profiled using **mass spectrometry**
     - **Proteins** are cleaved into peptides.
@@ -39,7 +39,8 @@ sub <- as_tibble(twin_dia) %>%
     rename(heavy = intensity_h, light = intensity_l) %>% 
     gather(label, intensity, heavy, light)
 
-sub %>% filter(protein == "APOA") %>% 
+sub %>% 
+    filter(protein == "APOA") %>% 
     ggplot(aes(run, log2(intensity), group = feature, colour = feature)) + 
     geom_point() + 
     geom_line() + 
@@ -64,7 +65,7 @@ Liu et al., Quantitative variability of 342 plasma proteins in a human twin popu
     - `r length(unique(twin_dia$visit))` time points.
     - $58 \times 2 \times 2 = 232$.
 
-* Data were acquired with MS workflows of:
+* Data were acquired with two MS workflows:
     - Data independent acquisition (DIA).
     - Selected reaction monitoring (SRM).
 
@@ -98,7 +99,7 @@ A **data frame** contains **variables** (in the **columns**) and **observations*
 
 * Data frame keeps together related values of variables (in a row).
 
-* Most functions for statistical modeling, inference and graphing in R take data frame as a primary input format that can be passed through a `data = ` argument. 
+* Most functions for statistical modeling, inference and graphing in R take data frame as a primary input format, passed through a `data = ` argument. 
 
 
 Dimension of the data:
@@ -134,7 +135,7 @@ View(twin_dia)
     
 * **Task 5:** group comparison using model-based inference.
 
-While R offers several tools that can be applied for each task, it is crucial to note how they can (or cannot) be integrated into a consistent workflow.
+While R offers several tools that can be applied for each task, it is important to note how they can (or cannot) be integrated into a consistent workflow.
 
 
 # Task 1: median of log-intensities (heavy channel) per run
@@ -153,7 +154,7 @@ This is a very common data analysis task: making grouped summaries, which involv
 
 ### Extract existing variables
 
-Keep only a subset of variables relevant to the analysis. For example, to create a data frame for sample annotation: 
+Keep only a subset of variables relevant to the analysis. For example, to create a look-up table for sample annotation: 
 
 ```{r}
 colnames(twin_dia)

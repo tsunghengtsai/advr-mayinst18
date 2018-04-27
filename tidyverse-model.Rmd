@@ -175,7 +175,6 @@ The approaches discussed so far have two obvious drawbacks:
 Better solutions in the tidyverse with the use of: 
 
 * Tidying methods for model objects from the **broom** package.
-
 * List-columns.
 
 
@@ -429,5 +428,7 @@ diff_zyg %>%
     + http://r4ds.had.co.nz/many-models.html
 
 * Jenny Bryan's purrr tutorial: https://jennybc.github.io/purrr-tutorial/
+
+* Row-oriented workflows: https://github.com/jennybc/row-oriented-workflows/
 
 * broom on CRAN: https://cran.r-project.org/web/packages/broom/index.html
