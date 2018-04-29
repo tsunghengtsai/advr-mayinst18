@@ -11,18 +11,18 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
 
-# Learning goals
+## Learning goals
 
-1. Overview of data from mass spectrometry-based proteomics experiments.
+* Overview of data from mass spectrometry-based proteomics experiments.
 
-2. Basic data analysis with tools in base R.
+* Basic data analysis with tools in base R.
 
 
-# A typical bottom-up MS-based proteomics experiment
+## A typical bottom-up MS-based proteomics experiment
 
 * Design: to compare **protein** abundance between **groups** of interest (e.g., healthy vs. diseased subjects). 
 
-* Measurements: **peptide features** profiled using **mass spectrometry**
+* Measurements: **feature intensities** measured by mass spectrometry
     - **Proteins** are cleaved into peptides.
     - **Peptides** are charged, fragmented and measured by mass spectrometry.
     - **Features** (fragments of charged peptides) are the basic unit of quantification.
@@ -56,18 +56,18 @@ sub %>%
 ```
 
 
-# Case study
+## Case study
 
 Liu et al., Quantitative variability of 342 plasma proteins in a human twin population, *Molecular Systems Biology*, 2015. [PMID: 25652787]
 
 * The dataset contains `r length(unique(twin_dia$run))` MS runs of plasma samples:
-    - `r length(unique(twin_dia$pair))` pairs of monozygotic (MZ) and dizygotic (DZ) twins.
-    - `r length(unique(twin_dia$visit))` time points.
-    - $58 \times 2 \times 2 = 232$.
+    - `r length(unique(twin_dia$pair))` pairs of monozygotic (MZ) and dizygotic (DZ) twins
+    - `r length(unique(twin_dia$visit))` time points
+    - $58 \times 2 \times 2 = 232$
 
 * Data were acquired with two MS workflows:
-    - Data independent acquisition (DIA).
-    - Selected reaction monitoring (SRM).
+    - data independent acquisition (DIA)
+    - selected reaction monitoring (SRM)
 
 * We will use a subset of the original dataset (with `r length(unique(twin_dia$protein))` proteins by DIA and `r length(unique(twin_srm$protein))` proteins by SRM).
 
@@ -77,15 +77,15 @@ str(twin_dia)
 
 The two data frames have the same format, containing 9 columns:
 
-* `protein` (chr): protein name.
-* `feature` (chr): combination of peptide, precursor charge state, fragment ion, and product charge state, separated by `_`.
-* `run` (chr): MS run identifier (R001-R232).
-* `pair` (int): pair identifier number (1-58).
-* `zygosity` (factor): zygosity (MZ, DZ).
-* `subject` (int): subject identifier number (1-116).
-* `visit` (int): time of visit (1, 2).
-* `intensity_l` (num): integrated feature intensity from light (L) channel.
-* `intensity_h` (num): integrated feature intensity from heavy (H, aka reference) channel.
+* `protein` (chr): protein name
+* `feature` (chr): combination of peptide, precursor charge state, fragment ion, and product charge state, separated by `_`
+* `run` (chr): MS run identifier (R001-R232)
+* `pair` (int): pair identifier number (1-58)
+* `zygosity` (factor): zygosity (MZ, DZ)
+* `subject` (int): subject identifier number (1-116)
+* `visit` (int): time of visit (1, 2)
+* `intensity_l` (num): integrated feature intensity from light (L) channel
+* `intensity_h` (num): integrated feature intensity from heavy (H, aka reference) channel
 
 ```{r}
 head(twin_dia)
@@ -123,36 +123,32 @@ View(twin_dia)
 ```
 
 
-# Data analysis tasks for the case study
+## Data analysis tasks for the case study
 
 * **Task 1:** compute the median of log-intensities for features from the heavy channel in each run.
-
 * **Task 2:** normalization of feature intensities to remove systematic bias across runs.
-
 * **Task 3:** summarization of feature intensities for each protein in every run.
-
 * **Task 4:** fit a linear model to characterize the summarized intensities.
-    
 * **Task 5:** group comparison using model-based inference.
 
 While R offers several tools that can be applied for each task, it is important to note how they can (or cannot) be integrated into a consistent workflow.
 
 
-# Task 1: median of log-intensities (heavy channel) per run
+## Task 1: median of log-intensities (heavy channel) per run
 
 This is a very common data analysis task: making grouped summaries, which involves application of the **split-apply-combine** approach. Let's begin with a review of necessary tools for data manipulation and transformation.
 
 
-## Data manipulation and transformation
+### Data manipulation and transformation
+
+Three common operations: 
 
 * Extract existing variables (with `$`, column names, or indices). 
-
 * Extract existing observations (with logical operations on the variables). 
-
 * Add new variables. 
 
 
-### Extract existing variables
+#### Extract existing variables
 
 Keep only a subset of variables relevant to the analysis. For example, to create a look-up table for sample annotation: 
 
@@ -165,7 +161,7 @@ head(design)
 ```
 
 
-### Extract existing observations with logical operations
+#### Extract existing observations with logical operations
 
 Extract observations based on values in specific columns:
 
@@ -177,8 +173,8 @@ head(sub_dia)
 
 Combine multiple logical operations:
 
-* Element-wise AND operation with `&`.
-* Element-wise OR operation with `|`. 
+* element-wise AND operation with `&`
+* element-wise OR operation with `|` 
 
 ```{r}
 # Filter based on columns intensity_h and run
@@ -187,7 +183,7 @@ head(sub_dia)
 ```
 
 
-### Add new variables
+#### Add new variables
 
 ```{r}
 # Log2 transformation
@@ -196,7 +192,7 @@ twin_dia$log2inty_l <- log2(twin_dia$intensity_l)
 ```
 
 
-### Combine multiple operatons 
+#### Combine multiple operatons 
 
 Compute the median of feature intensities from the heavy channel (`log2inty_h`) in one run (`R001`):
 
@@ -212,7 +208,7 @@ There are two issues when combining multiple operations with functions in base R
 2. The **nested representation** makes the flow of operation less readable and thus error-prone. Creating intermediate objects may be helpful if the objects are named properly (naming itself can be hard though).
 
 
-## Split-apply-combine
+### The split-apply-combine approach
 
 A very common pattern to make grouped summaries: 
 
@@ -223,7 +219,7 @@ A very common pattern to make grouped summaries:
 In Task 1, to compute the medians of log-intensities in all runs, we need to split the column vector `log2inty_h` into subsets defined by `run`, apply `median()` to each subset, and combine the results.
 
 
-## Approach 1a: use a `for` loop
+### Approach 1a: use a `for` loop
 
 ```{r}
 # Approach 1a
@@ -237,7 +233,7 @@ str(medians)
 ```
 
 
-## Approach 1b: use `tapply()`
+### Approach 1b: use `tapply()`
 
 Syntax: `tapply(X, GROUP, FUN)`.
 
@@ -248,7 +244,7 @@ head(medians)  # a named vector is returned
 ```
 
 
-## Approach 1c: use `aggregate()`
+### Approach 1c: use `aggregate()`
 
 Syntax: `aggregate(X, GROUP, FUN)`.
 
@@ -266,7 +262,7 @@ colnames(df_median)[2] <- "run_median"
 `tapply()` and `aggregate()` are tools for **functional programming** that will be discussed in greater detail in a later section. Note that their outputs are of different classes.
 
 
-# Task 2: normalization
+## Task 2: normalization
 
 Adjust the log-intensities to equalize the medians across runs to a global median: 
 
@@ -275,7 +271,7 @@ Adjust the log-intensities to equalize the medians across runs to a global media
 ```
 
 
-## Approach 2a: use a `for` loop
+### Approach 2a: use a `for` loop
 
 ```{r}
 # Use a for loop
@@ -297,7 +293,7 @@ twin_dia$log2inty_l <- log2(twin_dia$intensity_l)
 ```
 
 
-## Approach 2b: use a vectorized representation 
+### Approach 2b: use a vectorized representation 
 
 A more efficient way is to use a vectorized representation with the named vector returned by `tapply()`: 
 
@@ -322,7 +318,7 @@ twin_dia$log2inty_l <- log2(twin_dia$intensity_l)
 ```
 
 
-## Approach 2c: merge computed medians to original data frame
+### Approach 2c: merge computed medians to original data frame
 
 We can also add one column for the median in each run (from `df_median` returned by `aggregate()`) to the original data frame `twin_dia`, with `merge()`. 
 
@@ -342,7 +338,7 @@ head(tapply(twin_dia2$log2inty_h, twin_dia2$run, median, na.rm = TRUE))
 ```
 
 
-# Task 3: summarization of feature intensities
+## Task 3: summarization of feature intensities
 
 For each **protein** and each **run**, compute the **log of the sum** of the normalized feature intensities in the heavy channel.
 
@@ -353,12 +349,12 @@ twin_dia2$intensity_l <- 2 ^ (twin_dia2$log2inty_l)
 ```
 
 
-## Approach 3a: use two `for` loops
+### Approach 3a: use two `for` loops
 
 One `for` loop for protein and the other for run. Skipped here.
 
 
-## Approach 3b: use `tapply()`
+### Approach 3b: use `tapply()`
 
 Use `tapply()` with grouping variables defined in a **list**:
 
@@ -373,7 +369,7 @@ head(sum_t)
 ```
 
 
-## Approach 3c: use `aggregate()`
+### Approach 3c: use `aggregate()`
 
 ```{r}
 # Approach 3c
@@ -402,12 +398,12 @@ colnames(sum_g)[3] <- "log2inty"
 Saving the grouped summaries in a data frame makes it easier to carry out statistical modeling and inference in subsequent analysis.
 
 
-# Task 4: fit a linear model to characterize summarized intensities
+## Task 4: fit a linear model to characterize summarized intensities
 
 For each **protein**, fit a linear model, extract summaries of the fitted model, and draw model-based inference.
 
 
-## Fit a linear regression model with `lm()`
+### Fit a linear regression model with `lm()`
 
 The first argument of `lm()` is a formula, e.g., `Y ~ X1 + X2`, where `Y` is the response and `X1`, `X2` are the predictive variables. These refer to the column names (variables) in a data frame, that we pass on to `lm()` through the `data` argument.
 
@@ -432,14 +428,14 @@ class(fit)
 ```
 
 
-## Utility functions
+### Utility functions
 
 R offers a couple of utility functions for linear models, such as `coef()`, `fitted()`, `residuals()`, `summary()`, `predict()`, for retrieving coefficients, fitted values, residuals, model summary, making predictions with the model, respectively.
 
 These functions can be applied in the same way for other model objects such as `glm()`, `gam()`, etc.
 
 
-### Use `summary()` to display an overview of the fitted model
+#### Use `summary()` to display an overview of the fitted model
 
 ```{r}
 summary(fit)
@@ -451,14 +447,14 @@ str(summary(fit))
 ```
 
 
-### Use `coef()` to retrieve estimated coefficients
+#### Use `coef()` to retrieve estimated coefficients
 
 ```{r}
 coef(fit)
 ```
 
 
-### Use `fitted()` to retrieve fitted values
+#### Use `fitted()` to retrieve fitted values
 
 ```{r}
 head(fitted(fit))
@@ -467,7 +463,7 @@ head(fitted(fit))
 To derive summaries for all the proteins, additional efforts are required to extract relevant information and package them into a convenient format. If we want to avoid using `for` loops, we will need to define specialized functions to extract summaries of interest that can be passed on to `tapply()` or `aggregate()`.
 
 
-# Task 5: model-based inference
+## Task 5: model-based inference
 
 Two-sample $t$-test on the subset of summaries for protein A2MG:
 
@@ -500,4 +496,7 @@ ttest$statistic
 ttest$p.value
 ```
 
-As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins. How would you implement a workflow to summarize the means of two groups, difference, $t$-statistic, $p$-value in every protein? Where does the inconvenience come from?
+As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins. Try to answer the following questions: 
+
+* How would you implement a workflow to summarize the means of two groups, difference, $t$-statistic, $p$-value in every protein? 
+* Do you see any inconvenience or inconsistency in the workflow? If so, where does the inconvenience come from?

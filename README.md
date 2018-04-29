@@ -1,3 +1,3 @@
 # advr-mayinst18
 
-Materals for Advanced R of the 2018 May Institute at Northeastern University
+Advanced R short course materials on tidyverse at 2018 May Institute
