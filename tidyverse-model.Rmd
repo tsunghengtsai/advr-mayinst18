@@ -21,7 +21,7 @@ load("adv-R-twin.RData")
 ```
 
 
-## Task for the case study
+## Tasks
 
 * **Task 1:** model-based summary of feature log-intensities for all proteins in every run.
     + Model the log-intensities of features for each protein with `lm()` where feature and run are treated as fixed effects.

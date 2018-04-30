@@ -69,7 +69,7 @@ Liu et al., Quantitative variability of 342 plasma proteins in a human twin popu
     - data independent acquisition (DIA)
     - selected reaction monitoring (SRM)
 
-* We will use a subset of the original dataset (with `r length(unique(twin_dia$protein))` proteins by DIA and `r length(unique(twin_srm$protein))` proteins by SRM).
+* We use a subset of the original dataset (with `r length(unique(twin_dia$protein))` proteins by DIA and `r length(unique(twin_srm$protein))` proteins by SRM).
 
 ```{r}
 str(twin_dia)
