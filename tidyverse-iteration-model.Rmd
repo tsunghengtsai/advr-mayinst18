@@ -263,7 +263,7 @@ List-columns keep together related items in a data frame, thus allowing to perfo
 We will use **nested data frame**, a particular instance of list-columns, as an example to discuss these techniques. Nested data frame is very useful for general applications of the split-apply-combine approach.
 
 
-### Nested data frame
+## Nested data frame
 
 Use `tidyr::nest()` to create a nested data frame: 
 
@@ -306,7 +306,7 @@ nested_dia %>% unnest(data)
 The **purrr** package provides a set of **map functions** to iterate over the list-columns with consistent syntax, which makes it easy to operate on list-columns.
 
 
-### The map functions of purrr
+## The map functions of purrr
 
 `purrr::map(X, FUN)` loops over a vector `X`, applies some operation `FUN()` to each element of `X`, and saves the results as a list. 
 It's essentially `lapply()`. However, there are some advantages of using the map functions of purrr to work with list-columns:
@@ -378,6 +378,25 @@ nested_dia %>% unnest(param) %>%
 ```
 
 Compared to the previous approaches, Approach 4 with nested data frame allows to explore the data in a principled way.
+
+
+## Map over multiple arguments
+
+* Use `purrr::map2()` to map a function over two vectors or lists in parallel. 
+
+* Use `purrr::pmap()` to map a function over two or more vectors or lists in parallel.
+
+```{r}
+# Use fitted model to make prediction: `predict(MODEL, DATA)`
+nested_dia %>% 
+    mutate(pred = map2(fit, data, predict))
+```
+
+```{r, eval=F}
+# Same as
+nested_dia %>% 
+    mutate(pred = pmap(list(fit, data), predict))
+```
 
 
 ## Task 2: hypothesis testing to find differentially abundant proteins
