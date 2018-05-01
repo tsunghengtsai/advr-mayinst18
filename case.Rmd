@@ -13,9 +13,9 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 ## Learning goals
 
-1. Data from a typical mass spectrometry-based proteomics experiment.
+1. Introduce mass spectrometry data and common data analysis tasks for the case study.
 
-2. Review tools in base R for common data analysis tasks.
+2. Review tools in base R for the tasks.
 
 
 ## A typical bottom-up MS-based proteomics experiment
@@ -95,7 +95,7 @@ head(twin_dia)
 class(twin_dia)
 ```
 
-A **data frame** contains **variables** (in the **columns**) and **observations** (in the **rows**) in a tabular form. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:
+A **data frame** contains **variables** (in **columns**) and **observations** (in **rows**) in a tabular form. It is essentially a **list** of vectors of equal length. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:
 
 * Data frame keeps together related values of variables (in a row).
 * Most functions for statistical modeling, inference and graphing in R take data frame as a primary input format, passed through a `data = ` argument. 
@@ -339,7 +339,7 @@ head(tapply(twin_dia2$log2inty_h, twin_dia2$run, median, na.rm = TRUE))
 
 ## Task 3: summarization of feature intensities
 
-For each **protein** and each **run**, compute the **log of the sum** of the normalized feature intensities in the heavy channel.
+For each **protein** and each **run**, compute the **log of the sum** of the normalized feature intensities in the light channel.
 
 ```{r}
 # Transform the normalized log-intensities back to the original scale
@@ -495,7 +495,7 @@ ttest$statistic
 ttest$p.value
 ```
 
-As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins. Try to answer the following questions: 
+As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins: 
 
-* How would you implement a workflow to summarize the means of two groups, difference, $t$-statistic, $p$-value in every protein? 
-* Do you see any inconvenience or inconsistency in the workflow? If so, where does the inconvenience come from?
+* How would you implement a workflow to summarize the means of two groups, difference, $t$-statistic, $p$-value for every protein? 
+* Do you see any inconvenience or inconsistency in the workflow? If so, where do they come from?

@@ -13,7 +13,7 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 ## Tasks
 
-* **Task 1:** normalize feature intensities, in a way that the median of reference feature intensities of each run is identical.
+* **Task 1:** normalize feature intensities, in a way that the median of reference feature intensities is identical across runs.
 * **Task 2:** evaluate the agreement between the DIA and SRM datasets in terms of protein quantification.
 
 
@@ -71,7 +71,7 @@ We can then merge this summary back to the original data frame to complete Task 
 
 * **Filtering joins** use information from one dataset to **extract cases** from another dataset
 
-Example figures in this session are from [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickham and Garrett Grolemund. Consider two datasets `x` and `y`: 
+Example figures are from [R for Data Science](http://r4ds.had.co.nz/) by Hadley Wickham and Garrett Grolemund. Consider two datasets `x` and `y`: 
 
 ```{r}
 x <- tibble(
@@ -354,14 +354,16 @@ twin_dia2 %>%
 Restore the model objects in a list-column: 
 
 ```{r}
-los_all %>% group_by(protein) %>% 
+los_all %>% 
+    group_by(protein) %>% 
     do(fit_cor = cor.test(.$logsum_dia, .$logsum_srm))
 ```
 
 We can use double brackets `[[]]` to retrieve the model objects from the list-column `fit_cor`:
 
 ```{r}
-los_cor <- los_all %>% group_by(protein) %>% 
+los_cor <- los_all %>% 
+    group_by(protein) %>% 
     do(fit_cor = cor.test(.$logsum_dia, .$logsum_srm))
 los_cor$fit_cor[[1]]
 ```
@@ -370,6 +372,9 @@ We will learn more techniques to work with **list-columns** and to develop gener
 
 
 ## Resources
+
+* Tidyverse
+    + https://www.tidyverse.org/
 
 * R for Data Science, Hadley Wickham and Garrett Grolemund
     + http://r4ds.had.co.nz/transform.html
@@ -381,6 +386,6 @@ We will learn more techniques to work with **list-columns** and to develop gener
     + https://github.com/hadley/data-science-in-tidyverse/
 
 * RStudio Cheat Sheets: 
-    + https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-import-cheatsheet.pdf
-    + https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf
+    + https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf
+    + https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
 

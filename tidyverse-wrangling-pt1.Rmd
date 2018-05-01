@@ -11,7 +11,7 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
 
-## Learning goal
+## Learning goals
 
 1. Recognize common patterns in data wrangling tasks.
 
@@ -61,7 +61,7 @@ head(twin_srm)
 
 ## Tasks
 
-* **Task 1:** normalize feature intensities, in a way that the median of reference feature intensities of each run is identical.
+* **Task 1:** normalize feature intensities, in a way that the median of reference feature intensities is identical across runs.
 * **Task 2:** evaluate the agreement between the DIA and SRM datasets in terms of protein quantification.
 
 We will discuss tools in the **tidyverse** to address the tasks. In particular, how to tidy up messy datasets, manipulate and transform data, carry out the split-apply-combine approach, and join datasets in a consistent fashion.
@@ -75,7 +75,7 @@ library(tidyverse)
 
 The [tidyverse](http://tidyverse.org/) is a collection of R packages that share common data representation and [design principles](http://tidyverse.tidyverse.org/articles/manifesto.html). It is designed to make data analysis easier. `library(tidyverse)` loads eights core packages: [ggplot2](http://ggplot2.tidyverse.org/), [dplyr](http://dplyr.tidyverse.org/), [tidyr](http://tidyr.tidyverse.org/), [readr](http://readr.tidyverse.org/), [purrr](http://purrr.tidyverse.org/), [tibble](http://tibble.tidyverse.org/), [stringr](http://stringr.tidyverse.org/), [forcats](http://forcats.tidyverse.org/). These packages provide functions that are involved in most data analysis projects. We will introduce core functions in **tidyr** and **dplyr**, and touch on a few aspects of tibble, purrr and ggplot2. There are other packages in the tidyverse focusing on different aspects of data analysis that you may find useful. For example, stringr for strings, and broom for model objects that we will also discuss. 
 
-```{r, out.width=625, echo=FALSE, fig.align='center'}
+```{r, out.width=600, echo=FALSE, fig.align='center'}
 knitr::include_graphics("http://r4ds.had.co.nz/diagrams/data-science.png")
 ```
 
@@ -169,7 +169,7 @@ sub2
 
 As for `sub2`, people may have different opinions on whether it is tidy, based on the basic unit to be processed: 
 
-* It is **tidy**, if you view *a feature in a channel (light or heavy) in one run* as an observation.
+* It is **tidy**, if you view *a feature in a channel (light or heavy) in one run, i.e., a peak* as an observation.
 
 * It is **not tidy**, if you view *a feature in one run* as an observation, which is scattered across two rows.
 
@@ -198,7 +198,7 @@ A package that helps reshape the layout of tabular datasets.
 
 ### Use `gather()` to gather multiple columns into a key-value pair
 
-`gather()` moves column names into a **key** column, gathering the column values into a single **value** column.
+`gather()` moves column names into a **key** column, and gathers the column values into a single **value** column.
 
 ```{r}
 sub1a
@@ -226,14 +226,13 @@ Apply for both `sub1a` and `sub1b` and merge the results:
 ```{r}
 tidy1a <- sub1a %>% gather(key = run, value = intensity_h, R001, R002, R003)
 tidy1b <- sub1b %>% gather(key = run, value = intensity_l, R001, R002, R003)
-dplyr::left_join(tidy1a, tidy1b)  # merge two parts of the dataset, introduced later 
+merge(tidy1a, tidy1b)  # merge two parts of the dataset
 ```
 
 
 ### Use `spread()` to spread a key-value pair into multiple columns
 
-`spread()` moves the unique values of a **key** column into the column names, spreading the values of a
-**value** column across the new columns that result.
+`spread()` moves the unique values of a **key** column onto the column names, and spreads the values of a **value** column to their corresponding columns.
 
 ```{r}
 sub2
@@ -246,7 +245,7 @@ To tidy up this dataset, we need to spread the values of the `intensity` column,
 sub2 %>% spread(key = label, value = intensity)
 ```
 
-In some cases, both `gather()` and `spread()` are needed for tidying up data.
+In some cases, both `gather()` and `spread()` are needed to tidy up data.
 
 ```{r}
 sub12
@@ -271,7 +270,7 @@ sub3 %>%
 Separator between columns:
 
 * If character, is interpreted as a regular expression.
-* If numeric, interpreted as positions to split at. 
+* If numeric, is interpreted as positions to split at. 
 
 Try to convert to better types using `convert = TRUE`, as in 
 
@@ -414,7 +413,7 @@ twin_dia %>%
 
 ### Use `mutate()` to add new variables
 
-`mutate()` uses **window functions**, functions that take a vector of values and return another vector of values.
+`mutate()` uses **window functions**, functions that take a vector of values and return another vector of the same length.
 
 ```{r}
 # Log2 transformation
@@ -500,7 +499,8 @@ twin_dia %>%
 
 ```{r}
 # Equalizing medians
-twin_dia %>% mutate(log2inty_h = log2(intensity_h)) %>% 
+twin_dia %>% 
+    mutate(log2inty_h = log2(intensity_h)) %>% 
     group_by(run) %>% 
     summarise(log2inty_med = median(log2inty_h, na.rm = TRUE)) %>% 
     mutate(log2inty_adj = median(log2inty_med) - log2inty_med)
@@ -510,6 +510,9 @@ In the next session, we'll learn how to merge this summary back to the original 
 
 
 ## Resources
+
+* Tidyverse
+    + https://www.tidyverse.org/
 
 * R for Data Science, Hadley Wickham and Garrett Grolemund
     + http://r4ds.had.co.nz/transform.html
@@ -521,6 +524,6 @@ In the next session, we'll learn how to merge this summary back to the original 
     + https://github.com/hadley/data-science-in-tidyverse/
 
 * RStudio Cheat Sheets: 
-    + https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-import-cheatsheet.pdf
-    + https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf
+    + https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf
+    + https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
 

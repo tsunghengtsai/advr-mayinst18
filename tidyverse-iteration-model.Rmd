@@ -70,7 +70,7 @@ twin_dia2
 
 ## Task 1: summarize feature log-intensities per protein with a linear model
 
-Model feature log-intensities with fixed effects of run and feature:
+Model feature log-intensities with **fixed effects** of **run** and **feature**:
 
 ```{r}
 # One protein (AACT) measured in 3 runs (R001, R002, R003)
@@ -170,22 +170,35 @@ The approaches discussed so far have two obvious drawbacks:
 
 2. The fitted models were not saved. To extract additional (unplanned) summaries, we need to refit the models. Saving the models in another list is fine, but care is needed to match each model with its corresponding protein.
 
-
 Better solutions in the tidyverse with the use of: 
 
 * tidying methods for model objects from the **broom** package
-* list-columns
+* **list-columns**
+
+
+## Why a model object is hard to work with?
+
+```{r}
+fit <- lm(log2inty_l ~ 0 + run + feature, data = sub_dia)
+summary(fit)
+
+# Extract coefficients
+data.frame(coef(summary(fit)))
+```
+
+* It requires **multiple steps** to convert coefficients in a data frame with information restored in **row names** and its **column names** can be inconvenient to access.
+* Some information (e.g., $p$-value) is computed in `print` method, but **not restored**.
 
 
 ## broom
 
 A package that turns model objects into data frames in tidy format with three tidying methods: 
 
-* `broom::tidy()`: to extract parameter-level summaries
+* `broom::tidy()`: to extract **parameter-level** summaries
     + model coefficients, statistic
-* `broom::augment()`: to extract observation-level summaries
+* `broom::augment()`: to extract **observation-level** summaries
     + predictions, residuals, raw values
-* `broom::glance()`: to extract model-level summaries
+* `broom::glance()`: to extract **model-level** summaries
     + model diagnosis
 
 ```{r, warning=FALSE, message=FALSE}
@@ -196,8 +209,6 @@ library(broom)
 Use broom to tidy up model objects:
 
 ```{r}
-fit <- lm(log2inty_l ~ 0 + run + feature, data = sub_dia)
-
 # Each row is a parameter
 tidy(fit)
 
@@ -372,7 +383,8 @@ nested_dia <- nested_dia %>%
     mutate(param = map(fit, tidy))
 
 # Unnest data and additional manipulation
-nested_dia %>% unnest(param) %>% 
+nested_dia %>% 
+    unnest(param) %>% 
     filter(str_detect(term, "run")) %>% 
     mutate(term = str_replace(term, "run", ""))
 ```
@@ -382,12 +394,12 @@ Compared to the previous approaches, Approach 4 with nested data frame allows to
 
 ## Map over multiple arguments
 
-* Use `purrr::map2()` to map a function over two vectors or lists in parallel. 
+* Use `purrr::map2(X, Y, FUN)` to map a function over two vectors or lists in parallel. 
 
-* Use `purrr::pmap()` to map a function over two or more vectors or lists in parallel.
+* Use `purrr::pmap(LIST, FUN)` to map a function over two or more vectors or lists in parallel.
 
 ```{r}
-# Use fitted model to make prediction: `predict(MODEL, DATA)`
+# Use fitted model to make prediction: `predict(fit, data)`
 nested_dia %>% 
     mutate(pred = map2(fit, data, predict))
 ```
