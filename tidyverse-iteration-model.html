@@ -193,7 +193,7 @@ twin_dia2</code></pre>
 </div>
 <div id="task-1-summarize-feature-log-intensities-per-protein-with-a-linear-model" class="section level2">
 <h2>Task 1: summarize feature log-intensities per protein with a linear model</h2>
-<p>Model feature log-intensities with fixed effects of run and feature:</p>
+<p>Model feature log-intensities with <strong>fixed effects</strong> of <strong>run</strong> and <strong>feature</strong>:</p>
 <pre class="r"><code># One protein (AACT) measured in 3 runs (R001, R002, R003)
 sub_dia &lt;- twin_dia2 %&gt;% 
     filter(protein == &quot;AACT&quot;, run %in% c(&quot;R001&quot;, &quot;R002&quot;, &quot;R003&quot;))
@@ -312,23 +312,63 @@ df_allprot &lt;- bind_rows(list_allprot)</code></pre>
 <p>Better solutions in the tidyverse with the use of:</p>
 <ul>
 <li>tidying methods for model objects from the <strong>broom</strong> package</li>
-<li>list-columns</li>
+<li><strong>list-columns</strong></li>
 </ul>
 </div>
+</div>
+<div id="why-a-model-object-is-hard-to-work-with" class="section level2">
+<h2>Why a model object is hard to work with?</h2>
+<pre class="r"><code>fit &lt;- lm(log2inty_l ~ 0 + run + feature, data = sub_dia)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log2inty_l ~ 0 + run + feature, data = sub_dia)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.102671 -0.062563  0.002684  0.043801  0.164990 
+## 
+## Coefficients:
+##                         Estimate Std. Error t value Pr(&gt;|t|)    
+## runR001                 16.81439    0.07341 229.038 4.67e-13 ***
+## runR002                 16.37387    0.07341 223.038 5.48e-13 ***
+## runR003                 16.99488    0.07341 231.497 4.38e-13 ***
+## featureEIGELYLPK_2_y6_1 -3.41916    0.08477 -40.335 1.55e-08 ***
+## featureEIGELYLPK_2_y7_1 -0.05015    0.08477  -0.592    0.576    
+## featureEIGELYLPK_2_y7_2 -3.11674    0.08477 -36.767 2.70e-08 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.1038 on 6 degrees of freedom
+## Multiple R-squared:      1,  Adjusted R-squared:      1 
+## F-statistic: 4.27e+04 on 6 and 6 DF,  p-value: 1.284e-13</code></pre>
+<pre class="r"><code># Extract coefficients
+data.frame(coef(summary(fit)))</code></pre>
+<pre><code>##                            Estimate Std..Error     t.value     Pr...t..
+## runR001                 16.81438877 0.07341296 229.0384362 4.674371e-13
+## runR002                 16.37386589 0.07341296 223.0378213 5.481447e-13
+## runR003                 16.99487922 0.07341296 231.4970002 4.384337e-13
+## featureEIGELYLPK_2_y6_1 -3.41915940 0.08476998 -40.3345545 1.552542e-08
+## featureEIGELYLPK_2_y7_1 -0.05014783 0.08476998  -0.5915753 5.757300e-01
+## featureEIGELYLPK_2_y7_2 -3.11674007 0.08476998 -36.7670259 2.700870e-08</code></pre>
+<ul>
+<li>It requires <strong>multiple steps</strong> to convert coefficients in a data frame with information restored in <strong>row names</strong> and its <strong>column names</strong> can be inconvenient to access.</li>
+<li>Some information (e.g., <span class="math inline">\(p\)</span>-value) is computed in <code>print</code> method, but <strong>not restored</strong>.</li>
+</ul>
 </div>
 <div id="broom" class="section level2">
 <h2>broom</h2>
 <p>A package that turns model objects into data frames in tidy format with three tidying methods:</p>
 <ul>
-<li><code>broom::tidy()</code>: to extract parameter-level summaries
+<li><code>broom::tidy()</code>: to extract <strong>parameter-level</strong> summaries
 <ul>
 <li>model coefficients, statistic</li>
 </ul></li>
-<li><code>broom::augment()</code>: to extract observation-level summaries
+<li><code>broom::augment()</code>: to extract <strong>observation-level</strong> summaries
 <ul>
 <li>predictions, residuals, raw values</li>
 </ul></li>
-<li><code>broom::glance()</code>: to extract model-level summaries
+<li><code>broom::glance()</code>: to extract <strong>model-level</strong> summaries
 <ul>
 <li>model diagnosis</li>
 </ul></li>
@@ -336,9 +376,7 @@ df_allprot &lt;- bind_rows(list_allprot)</code></pre>
 <pre class="r"><code>library(broom)
 ?broom</code></pre>
 <p>Use broom to tidy up model objects:</p>
-<pre class="r"><code>fit &lt;- lm(log2inty_l ~ 0 + run + feature, data = sub_dia)
-
-# Each row is a parameter
+<pre class="r"><code># Each row is a parameter
 tidy(fit)</code></pre>
 <pre><code>##                      term    estimate  std.error   statistic      p.value
 ## 1                 runR001 16.81438877 0.07341296 229.0384362 4.674371e-13
@@ -501,8 +539,9 @@ fit_dia %&gt;% glance(fit)</code></pre>
 <li><strong>Simplify</strong> back to a data frame or atomic vector.</li>
 </ul>
 <p>We will use <strong>nested data frame</strong>, a particular instance of list-columns, as an example to discuss these techniques. Nested data frame is very useful for general applications of the split-apply-combine approach.</p>
-<div id="nested-data-frame" class="section level3">
-<h3>Nested data frame</h3>
+</div>
+<div id="nested-data-frame" class="section level2">
+<h2>Nested data frame</h2>
 <p>Use <code>tidyr::nest()</code> to create a nested data frame:</p>
 <pre class="r"><code>nested_dia &lt;- twin_dia2 %&gt;% 
     group_by(protein) %&gt;% 
@@ -570,8 +609,8 @@ nested_dia[[1, &quot;data&quot;]]</code></pre>
 ## #   log2inty_adj &lt;dbl&gt;</code></pre>
 <p>The <strong>purrr</strong> package provides a set of <strong>map functions</strong> to iterate over the list-columns with consistent syntax, which makes it easy to operate on list-columns.</p>
 </div>
-<div id="the-map-functions-of-purrr" class="section level3">
-<h3>The map functions of purrr</h3>
+<div id="the-map-functions-of-purrr" class="section level2">
+<h2>The map functions of purrr</h2>
 <p><code>purrr::map(X, FUN)</code> loops over a vector <code>X</code>, applies some operation <code>FUN()</code> to each element of <code>X</code>, and saves the results as a list. It’s essentially <code>lapply()</code>. However, there are some advantages of using the map functions of purrr to work with list-columns:</p>
 <ul>
 <li>Handy shortcuts to define anonymous functions.</li>
@@ -658,7 +697,6 @@ nested_dia %&gt;% unnest(param)</code></pre>
 ##  9 A1AG_BOVINE runR009     15.0     0.104      144.      0.
 ## 10 A1AG_BOVINE runR010     14.2     0.104      136.      0.
 ## # ... with 8,061 more rows</code></pre>
-</div>
 <div id="approach-4-for-task-1" class="section level3">
 <h3>Approach 4 for Task 1</h3>
 <ul>
@@ -679,7 +717,8 @@ nested_dia &lt;- nested_dia %&gt;%
     mutate(param = map(fit, tidy))
 
 # Unnest data and additional manipulation
-nested_dia %&gt;% unnest(param) %&gt;% 
+nested_dia %&gt;% 
+    unnest(param) %&gt;% 
     filter(str_detect(term, &quot;run&quot;)) %&gt;% 
     mutate(term = str_replace(term, &quot;run&quot;, &quot;&quot;))</code></pre>
 <pre><code>## # A tibble: 7,656 x 6
@@ -698,6 +737,33 @@ nested_dia %&gt;% unnest(param) %&gt;%
 ## # ... with 7,646 more rows</code></pre>
 <p>Compared to the previous approaches, Approach 4 with nested data frame allows to explore the data in a principled way.</p>
 </div>
+</div>
+<div id="map-over-multiple-arguments" class="section level2">
+<h2>Map over multiple arguments</h2>
+<ul>
+<li><p>Use <code>purrr::map2(X, Y, FUN)</code> to map a function over two vectors or lists in parallel.</p></li>
+<li><p>Use <code>purrr::pmap(LIST, FUN)</code> to map a function over two or more vectors or lists in parallel.</p></li>
+</ul>
+<pre class="r"><code># Use fitted model to make prediction: `predict(fit, data)`
+nested_dia %&gt;% 
+    mutate(pred = map2(fit, data, predict))</code></pre>
+<pre><code>## # A tibble: 33 x 5
+##    protein     data                  fit      param                  pred 
+##    &lt;chr&gt;       &lt;list&gt;                &lt;list&gt;   &lt;list&gt;                 &lt;lis&gt;
+##  1 A1AG_BOVINE &lt;tibble [6,728 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [260 × 5]&gt; &lt;dbl…
+##  2 A2MG        &lt;tibble [3,712 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [247 × 5]&gt; &lt;dbl…
+##  3 AACT        &lt;tibble [928 × 12]&gt;   &lt;S3: lm&gt; &lt;data.frame [235 × 5]&gt; &lt;dbl…
+##  4 APOA        &lt;tibble [1,392 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [237 × 5]&gt; &lt;dbl…
+##  5 APOA1       &lt;tibble [3,944 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [248 × 5]&gt; &lt;dbl…
+##  6 APOB        &lt;tibble [1,392 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [237 × 5]&gt; &lt;dbl…
+##  7 APOE        &lt;tibble [5,568 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [255 × 5]&gt; &lt;dbl…
+##  8 C1QA        &lt;tibble [1,160 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [236 × 5]&gt; &lt;dbl…
+##  9 C1QB        &lt;tibble [2,552 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [242 × 5]&gt; &lt;dbl…
+## 10 C1QC        &lt;tibble [1,160 × 12]&gt; &lt;S3: lm&gt; &lt;data.frame [236 × 5]&gt; &lt;dbl…
+## # ... with 23 more rows</code></pre>
+<pre class="r"><code># Same as
+nested_dia %&gt;% 
+    mutate(pred = pmap(list(fit, data), predict))</code></pre>
 </div>
 <div id="task-2-hypothesis-testing-to-find-differentially-abundant-proteins" class="section level2">
 <h2>Task 2: hypothesis testing to find differentially abundant proteins</h2>

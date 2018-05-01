@@ -128,8 +128,8 @@ $(document).ready(function () {
 <div id="learning-goals" class="section level2">
 <h2>Learning goals</h2>
 <ol style="list-style-type: decimal">
-<li><p>Data from a typical mass spectrometry-based proteomics experiment.</p></li>
-<li><p>Review tools in base R for common data analysis tasks.</p></li>
+<li><p>Introduce mass spectrometry data and common data analysis tasks for the case study.</p></li>
+<li><p>Review tools in base R for the tasks.</p></li>
 </ol>
 </div>
 <div id="a-typical-bottom-up-ms-based-proteomics-experiment" class="section level2">
@@ -203,7 +203,7 @@ $(document).ready(function () {
 ## 6          NA       27247</code></pre>
 <pre class="r"><code>class(twin_dia)</code></pre>
 <pre><code>## [1] &quot;data.frame&quot;</code></pre>
-<p>A <strong>data frame</strong> contains <strong>variables</strong> (in the <strong>columns</strong>) and <strong>observations</strong> (in the <strong>rows</strong>) in a tabular form. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:</p>
+<p>A <strong>data frame</strong> contains <strong>variables</strong> (in <strong>columns</strong>) and <strong>observations</strong> (in <strong>rows</strong>) in a tabular form. It is essentially a <strong>list</strong> of vectors of equal length. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:</p>
 <ul>
 <li>Data frame keeps together related values of variables (in a row).</li>
 <li>Most functions for statistical modeling, inference and graphing in R take data frame as a primary input format, passed through a <code>data =</code> argument.</li>
@@ -440,7 +440,7 @@ head(tapply(twin_dia2$log2inty_h, twin_dia2$run, median, na.rm = TRUE))</code></
 </div>
 <div id="task-3-summarization-of-feature-intensities" class="section level2">
 <h2>Task 3: summarization of feature intensities</h2>
-<p>For each <strong>protein</strong> and each <strong>run</strong>, compute the <strong>log of the sum</strong> of the normalized feature intensities in the heavy channel.</p>
+<p>For each <strong>protein</strong> and each <strong>run</strong>, compute the <strong>log of the sum</strong> of the normalized feature intensities in the light channel.</p>
 <pre class="r"><code># Transform the normalized log-intensities back to the original scale
 twin_dia2$intensity_h &lt;- 2 ^ (twin_dia2$log2inty_h)
 twin_dia2$intensity_l &lt;- 2 ^ (twin_dia2$log2inty_l)</code></pre>
@@ -639,10 +639,10 @@ ttest</code></pre>
 ## -2.795639</code></pre>
 <pre class="r"><code>ttest$p.value</code></pre>
 <pre><code>## [1] 0.005828219</code></pre>
-<p>As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins. Try to answer the following questions:</p>
+<p>As in Task 4, it requires additional efforts to work with model objects, in order to make and combine summaries for all the proteins:</p>
 <ul>
-<li>How would you implement a workflow to summarize the means of two groups, difference, <span class="math inline">\(t\)</span>-statistic, <span class="math inline">\(p\)</span>-value in every protein?</li>
-<li>Do you see any inconvenience or inconsistency in the workflow? If so, where does the inconvenience come from?</li>
+<li>How would you implement a workflow to summarize the means of two groups, difference, <span class="math inline">\(t\)</span>-statistic, <span class="math inline">\(p\)</span>-value for every protein?</li>
+<li>Do you see any inconvenience or inconsistency in the workflow? If so, where do they come from?</li>
 </ul>
 </div>
 

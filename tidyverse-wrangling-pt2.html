@@ -128,7 +128,7 @@ $(document).ready(function () {
 <div id="tasks" class="section level2">
 <h2>Tasks</h2>
 <ul>
-<li><strong>Task 1:</strong> normalize feature intensities, in a way that the median of reference feature intensities of each run is identical.</li>
+<li><strong>Task 1:</strong> normalize feature intensities, in a way that the median of reference feature intensities is identical across runs.</li>
 <li><strong>Task 2:</strong> evaluate the agreement between the DIA and SRM datasets in terms of protein quantification.</li>
 </ul>
 </div>
@@ -196,7 +196,7 @@ twin_dia %&gt;% mutate(log2inty_h = log2(intensity_h)) %&gt;%
 <li><p><strong>Mutating joins</strong> use information from one dataset to <strong>add variables</strong> to another dataset</p></li>
 <li><p><strong>Filtering joins</strong> use information from one dataset to <strong>extract cases</strong> from another dataset</p></li>
 </ul>
-<p>Example figures in this session are from <a href="http://r4ds.had.co.nz/">R for Data Science</a> by Hadley Wickham and Garrett Grolemund. Consider two datasets <code>x</code> and <code>y</code>:</p>
+<p>Example figures are from <a href="http://r4ds.had.co.nz/">R for Data Science</a> by Hadley Wickham and Garrett Grolemund. Consider two datasets <code>x</code> and <code>y</code>:</p>
 <pre class="r"><code>x &lt;- tibble(
     key = c(1, 2, 3), 
     val_x = c(&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;)
@@ -523,7 +523,8 @@ los_all %&gt;%
 ## 10 C1QC        &lt;tibble [2 × 13]&gt;
 ## # ... with 23 more rows</code></pre>
 <p>Restore the model objects in a list-column:</p>
-<pre class="r"><code>los_all %&gt;% group_by(protein) %&gt;% 
+<pre class="r"><code>los_all %&gt;% 
+    group_by(protein) %&gt;% 
     do(fit_cor = cor.test(.$logsum_dia, .$logsum_srm))</code></pre>
 <pre><code>## Source: local data frame [33 x 2]
 ## Groups: &lt;by row&gt;
@@ -543,7 +544,8 @@ los_all %&gt;%
 ## 10 C1QC        &lt;S3: htest&gt;
 ## # ... with 23 more rows</code></pre>
 <p>We can use double brackets <code>[[]]</code> to retrieve the model objects from the list-column <code>fit_cor</code>:</p>
-<pre class="r"><code>los_cor &lt;- los_all %&gt;% group_by(protein) %&gt;% 
+<pre class="r"><code>los_cor &lt;- los_all %&gt;% 
+    group_by(protein) %&gt;% 
     do(fit_cor = cor.test(.$logsum_dia, .$logsum_srm))
 los_cor$fit_cor[[1]]</code></pre>
 <pre><code>## 
@@ -563,6 +565,10 @@ los_cor$fit_cor[[1]]</code></pre>
 <div id="resources" class="section level2">
 <h2>Resources</h2>
 <ul>
+<li>Tidyverse
+<ul>
+<li><a href="https://www.tidyverse.org/" class="uri">https://www.tidyverse.org/</a></li>
+</ul></li>
 <li>R for Data Science, Hadley Wickham and Garrett Grolemund
 <ul>
 <li><a href="http://r4ds.had.co.nz/transform.html" class="uri">http://r4ds.had.co.nz/transform.html</a></li>
@@ -576,8 +582,8 @@ los_cor$fit_cor[[1]]</code></pre>
 </ul></li>
 <li>RStudio Cheat Sheets:
 <ul>
-<li><a href="https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-import-cheatsheet.pdf" class="uri">https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-import-cheatsheet.pdf</a></li>
-<li><a href="https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf" class="uri">https://github.com/rstudio/cheatsheets/raw/master/source/pdfs/data-transformation-cheatsheet.pdf</a></li>
+<li><a href="https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf" class="uri">https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf</a></li>
+<li><a href="https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf" class="uri">https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf</a></li>
 </ul></li>
 </ul>
 </div>
