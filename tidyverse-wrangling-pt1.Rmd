@@ -13,7 +13,9 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 ## Learning goal
 
-* Learn and be familiar with methods for data wrangling in the tidyverse.
+1. Recognize common patterns in data wrangling tasks.
+
+2. Use methods in the tidyverse to carry out data wrangling.
 
 
 ## Example datasets
@@ -138,7 +140,8 @@ Are the datasets of the case study `twin_dia` and `twin_srm` tidy? Let's look at
 
 ```{r, echo=FALSE}
 # Making untidy data
-td_sub <- as_tibble(twin_srm) %>% select(protein, feature, run, intensity_h, intensity_l) %>% 
+td_sub <- as_tibble(twin_srm) %>% 
+    select(protein, feature, run, intensity_h, intensity_l) %>% 
     filter(run %in% c("R001", "R002", "R003"), protein %in% c("APOA", "C1QA"))
 
 sub1a <- td_sub %>% select(-intensity_l) %>% spread(run, intensity_h, convert = F)
@@ -158,7 +161,7 @@ sub1a
 sub1b
 ```
 
-In `sub1a` and `sub1b`, some of the column names (R001, R002, R003) are values of a variable, rather than variables.
+In `sub1a` and `sub1b`, some of the column names (`R001`, `R002`, `R003`) are values of a variable, rather than variables.
 
 ```{r}
 sub2
@@ -211,10 +214,10 @@ sub1a %>% gather(key = run, value = intensity_h, R001, R002, R003)
 Other ways to inform the function to gather columns `R001`, `R002`, and `R003`:
 
 ```{r, eval=F}
-# by index number
+# With numeric indexes
 sub1a %>% gather(key = run, value = intensity_h, 3:5)
 
-# columns to be excluded
+# Columns to be excluded
 sub1a %>% gather(key = run, value = intensity_h, -protein, -feature)
 ```
 
@@ -260,19 +263,21 @@ sub12 %>%
 
 ### Use `separate()` to split a column with a separator
 
+```{r}
+sub3 %>% 
+    separate(col = intensity_both, into = c("intensity_h", "intensity_l"), sep = "/")
+```
+
 Separator between columns:
 
 * If character, is interpreted as a regular expression.
 * If numeric, interpreted as positions to split at. 
 
-```{r}
-sub3 %>% separate(col = intensity_both, into = c("intensity_h", "intensity_l"), sep = "/")
-```
-
 Try to convert to better types using `convert = TRUE`, as in 
 
 ```{r, eval=FALSE}
-sub3 %>% separate(col = intensity_both, into = c("intensity_h", "intensity_l"), sep = "/", convert = TRUE)
+sub3 %>% 
+    separate(col = intensity_both, into = c("intensity_h", "intensity_l"), sep = "/", convert = TRUE)
 ```
 
 Separate `intensity_both` and `feature` columns:
@@ -366,6 +371,18 @@ twin_dia %>% distinct(protein, feature)
 * `one_of()`
 * `everything()`
 
+```{r, eval=FALSE}
+# Select columns that contain `intensity`
+twin_dia %>% 
+    select(contains("intensity"))
+```
+
+```{r, eval=FALSE}
+# Reorder to place column `run` at the beginning, followed by all others
+twin_dia %>% 
+    select(run, everything())
+```
+
 
 ### Use `filter()` to extract existing observations
 
@@ -387,22 +404,17 @@ twin_dia %>% filter(is.na(intensity_h), !is.na(intensity_l)) %>%
 * `is.na()`
 * `between()`, `near()`
 
+`between(x, left, right)` is a shortcut for `x >= left & x <= right`:
+
+```{r, eval=F}
+twin_dia %>% 
+    filter(between(intensity_l, 1000, 1100))
+```
+
 
 ### Use `mutate()` to add new variables
 
 `mutate()` uses **window functions**, functions that take a vector of values and return another vector of values.
-
-
-#### Useful window functions
-
-* `+`, `-`, etc
-* `log()`
-* `lead()`, `lag()`
-* `dense_rank()`, `min_rank()`, `percent_rank()`, `row_number()`, `cume_dist()`, `ntile()`
-* `cumsum()`, `cummean()`, `cummin()`, `cummax()`, `cumany()`, `cumall()`
-* `na_if()`, `coalesce()`
-* `if_else()`, `recode()`, `case_when()`
-
 
 ```{r}
 # Log2 transformation
@@ -417,6 +429,34 @@ twin_dia %>%
     )
 ```
 
+#### Useful window functions
+
+* `+`, `-`, etc
+* `log()`
+* `lead()`, `lag()`
+* `dense_rank()`, `min_rank()`, `percent_rank()`, `row_number()`, `cume_dist()`, `ntile()`
+* `cumsum()`, `cummean()`, `cummin()`, `cummax()`, `cumany()`, `cumall()`
+* `na_if()`, `coalesce()`
+* `if_else()`, `recode()`, `case_when()`
+
+`recode()` is a vectorized version of `switch()`:
+
+```{r, eval=F}
+twin_dia %>% 
+    mutate(zygosity = recode(zygosity, MZ = "monozygotic", DZ = "dizygotic"))
+```
+
+Use `case_when()` to vectorize multiple `if` and `else if` statements:
+
+```{r, eval=F}
+twin_dia %>% 
+    mutate(inty_cat = case_when(
+        intensity_l < 1000 ~ "low-intensity", 
+        between(intensity_l, 1000, 30000) ~ "mid-intensity", 
+        intensity_l > 10000 ~ "high-intensity"
+    ))
+```
+
 
 ### Use `group_by()` and `summarise()` to make grouped summaries
 
@@ -427,7 +467,7 @@ twin_dia %>%
 
 #### Useful summary functions
 
-* Center: `mean()`, `median()`
+* Location: `mean()`, `median()`
 * Spread: `sd()`, `IQR()`, `mad()`
 * Range: `min()`, `max()`, `quantile()`
 * Position: `first()`, `last()`, `nth()`
@@ -466,7 +506,7 @@ twin_dia %>% mutate(log2inty_h = log2(intensity_h)) %>%
     mutate(log2inty_adj = median(log2inty_med) - log2inty_med)
 ```
 
-In the next section, we'll learn how to merge this summary back to the original data frame to complete **Task 1**.
+In the next session, we'll learn how to merge this summary back to the original data frame to complete Task 1.
 
 
 ## Resources

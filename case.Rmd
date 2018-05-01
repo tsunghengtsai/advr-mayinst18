@@ -13,9 +13,9 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 ## Learning goals
 
-* Overview of data from mass spectrometry-based proteomics experiments.
+1. Data from a typical mass spectrometry-based proteomics experiment.
 
-* Basic data analysis with tools in base R.
+2. Review tools in base R for common data analysis tasks.
 
 
 ## A typical bottom-up MS-based proteomics experiment
@@ -98,7 +98,6 @@ class(twin_dia)
 A **data frame** contains **variables** (in the **columns**) and **observations** (in the **rows**) in a tabular form. The columns in a data frame have the same length, but they may represent different types of variables (e.g., numeric, character, logical, etc.). Data frames are preferable in most analysis tasks because:
 
 * Data frame keeps together related values of variables (in a row).
-
 * Most functions for statistical modeling, inference and graphing in R take data frame as a primary input format, passed through a `data = ` argument. 
 
 
@@ -259,7 +258,7 @@ head(df_median)  # a data frame is returned
 colnames(df_median)[2] <- "run_median"
 ```
 
-`tapply()` and `aggregate()` are tools for **functional programming** that will be discussed in greater detail in a later section. Note that their outputs are of different classes.
+`tapply()` and `aggregate()` are tools for **functional programming** that will be discussed in greater detail in a later session. Note that their outputs are of different classes.
 
 
 ## Task 2: normalization

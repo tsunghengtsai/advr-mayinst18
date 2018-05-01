@@ -1,5 +1,5 @@
 ---
-title: "Tidyverse: iterations and model"
+title: "Tidyverse: iteration and model"
 author: "Advanced R"
 date: "Thursday May 3, 2018"
 output: html_document
@@ -11,9 +11,14 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 ```
 
 
-## Learning goal
+## Learning goals
 
-* Consistent workflow for data wrangling and statistical modeling in the tidyverse.
+1. Methods to iterate over lists.
+
+2. Methods to tidy up model objects.
+
+3. Construct consistent workflow for data wrangling and statistical modeling in the tidyverse.
+
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -26,19 +31,18 @@ load("adv-R-twin.RData")
 * **Task 1:** model-based summary of feature log-intensities for all proteins in every run.
     + Model the log-intensities of features for each protein with `lm()` where feature and run are treated as fixed effects.
     + Obtain run-level summarization with the fitted model.
-    
-* **Task 2:** hypothesis testing to find differentially abundant proteins.
 
+* **Task 2:** hypothesis testing to find differentially abundant proteins.
 
 We will discuss tools to perform modeling/testing in multiple groups (in this case, proteins) through the use of
 
-* `for` loop
+* for loop
 * list-column
 
 
 ## Normalization
 
-Same as in the previous section:
+Same as in the previous session:
 
 ```{r}
 twin_dia <- as_tibble(twin_dia) %>% 
@@ -64,7 +68,7 @@ twin_dia2
 ```
 
 
-## Use linear model to summarize feature log-intensities of a protein
+## Task 1: summarize feature log-intensities per protein with a linear model
 
 Model feature log-intensities with fixed effects of run and feature:
 
@@ -97,15 +101,15 @@ coef(summary(fit))
 fit_coef <- coef(fit)
 
 tibble(effect = names(fit_coef), estimate = fit_coef) %>% 
-    filter(grepl("run", effect)) %>% 
-    mutate(effect = gsub("run", "", effect))
+    filter(str_detect(effect, "run")) %>% 
+    mutate(effect = str_replace(effect, "run", ""))
 ```
 
 
-## Summarization for all proteins with a `for` loop
+## Summarization for all proteins with a `for()` loop
 
 
-### Approach 1
+### Approach 1 for Task 1
 
 * Loop over proteins.
 * For each protein, fit a linear model with `lm()` and extract estimated parameters with `coef()`.
@@ -125,8 +129,8 @@ for (i in seq_along(prots)) {
         effect = names(fit_coef), 
         estimate = fit_coef
     ) %>% 
-        filter(grepl("run", effect)) %>% 
-        mutate(effect = gsub("run", "", effect))
+        filter(str_detect(effect, "run")) %>% 
+        mutate(effect = str_replace(effect, "run", ""))
     df_allprot <- rbind(df_allprot, df_oneprot)
 }
 ```
@@ -154,20 +158,20 @@ for (i in seq_along(prots)) {
         effect = names(fit_coef), 
         estimate = fit_coef
     ) %>% 
-        filter(grepl("run", effect)) %>% 
-        mutate(effect = gsub("run", "", effect))
+        filter(str_detect(effect, "run")) %>% 
+        mutate(effect = str_replace(effect, "run", ""))
 }
 df_allprot <- bind_rows(list_allprot)
 ```
 
 The approaches discussed so far have two obvious drawbacks: 
 
-1. The output objects of models are not tidy. Additional efforts are required to extract and reformat (tidy) summaries of interest, where different summaries may need different utility function to obtain.
+1. The output objects of the modeling are not tidy. Additional efforts are required to extract and reformat (tidy) summaries of interest, where different summaries may need different utility function to obtain.
 
 2. The fitted models were not saved. To extract additional (unplanned) summaries, we need to refit the models. Saving the models in another list is fine, but care is needed to match each model with its corresponding protein.
 
 
-Better solutions in the tidyverse with the use of
+Better solutions in the tidyverse with the use of: 
 
 * tidying methods for model objects from the **broom** package
 * list-columns
@@ -189,7 +193,7 @@ library(broom)
 ?broom
 ```
 
-Use broom to tidy up output objects of models:
+Use broom to tidy up model objects:
 
 ```{r}
 fit <- lm(log2inty_l ~ 0 + run + feature, data = sub_dia)
@@ -204,10 +208,10 @@ augment(fit)
 glance(fit)
 ```
 
-We learned from the previous section how to obtain grouped summaries with arbitrary operations by using `dplyr::group_by()` + `dplyr::do()`. We can now carry out the task with these tools.
+We learned from the previous session how to obtain grouped summaries with arbitrary operations by using `dplyr::group_by()` + `dplyr::do()`. We can now carry out the task with these tools.
 
 
-### Approach 3
+### Approach 3 for Task 1
 
 * Define the analysis unit (protein, in this case) with `dplyr::group_by()`.
 * Summarize for each protein, with operations passed through `dplyr::do()`:
@@ -219,8 +223,8 @@ We learned from the previous section how to obtain grouped summaries with arbitr
 twin_dia2 %>% 
     group_by(protein) %>%
     do(tidy(lm(log2inty_l ~ 0 + run + feature, data = .))) %>% 
-    filter(grepl("run", term)) %>% 
-    mutate(term = gsub("run", "", term))
+    filter(str_detect(term, "run")) %>% 
+    mutate(term = str_replace(term, "run", ""))
 ```
 
 Note that `dplyr::do()` requires explicit use of the `.`  placeholder, to indicate where the input (grouped data) gets passed on to operate. Multiple rows are generated from each model, each corresponds to a run-level summary of one protein. 
@@ -228,7 +232,7 @@ Note that `dplyr::do()` requires explicit use of the `.`  placeholder, to indica
 
 ## List-columns
 
-As we discussed in the previous section, we can also save the fitted model for each protein in a new list-column: 
+As discussed in the previous session, we can also save the fitted model for each protein in a new list-column: 
 
 ```{r}
 fit_dia <- twin_dia2 %>% 
@@ -237,7 +241,7 @@ fit_dia <- twin_dia2 %>%
 fit_dia
 ```
 
-This is handy to get different levels of summaries by applying different tidying methods: 
+It's handy to get different levels of summaries by applying different tidying methods: 
 
 ```{r}
 # Parameter-level summaries
@@ -250,7 +254,7 @@ fit_dia %>% augment(fit)
 fit_dia %>% glance(fit)
 ```
 
-List-columns keep together related items in a data frame, thus allowing to perform operations in a structurally-informative fashion. Their flexibility makes it convenient to be used as intermediate data structure for a variety of operations which may take different data formats. To work effectively with list-columns, however, we need to be familiar with techniques to work with lists, including those to 
+List-columns keep together related items in a data frame, thus allowing to perform operations in a structurally-informative fashion. Their flexibility makes it convenient to be used as intermediate data structure for a variety of operations which may take different data formats. To work effectively with list-columns, however, we need to be familiar with techniques to work with lists, including those to
 
 * **Inspect** the content in a list-column and extract relevant parts for further operations.
 * **Compute** with functions developed to work with lists.
@@ -276,10 +280,10 @@ nested_dia %>%
     nest(-protein)
 ```
 
-Nested data frame organizes the data in a structurally-informative format:
+Nested data frame organizes the data in a structurally-informative format: 
 
-* Each **row** forms a group (e.g., protein)
-* The `data` **column** stores the stratified data corresponding to each protein as a list (list-column)
+* Each **row** forms a group (e.g., protein).
+* The `data` **column** stores the stratified data corresponding to each protein as a list (list-column).
 
 Inspect/extract data in the list with double brackets `[[]]`:
 
@@ -304,10 +308,11 @@ The **purrr** package provides a set of **map functions** to iterate over the li
 
 ### The map functions of purrr
 
-`purrr::map(X, FUN)` loops over a vector `X`, applies some operation `FUN()` to each element of `X`, and saves the results as a list. It's essentially `lapply()`. However, there are some advantages of using the map functions of purrr to work with list-columns:
+`purrr::map(X, FUN)` loops over a vector `X`, applies some operation `FUN()` to each element of `X`, and saves the results as a list. 
+It's essentially `lapply()`. However, there are some advantages of using the map functions of purrr to work with list-columns:
 
-* Handy shortcuts to define anonymous functions
-* Type-stability with `map_chr()`, `map_dbl()`, `map_int()`, `map_lgl()`, etc., as opposed to `sapply()`
+* Handy shortcuts to define anonymous functions.
+* Type-stability with `map_chr()`, `map_dbl()`, `map_int()`, `map_lgl()`, etc., as opposed to `sapply()`.
 
 ```{r}
 # For each protein, fit a linear model with purrr::map()
@@ -347,7 +352,7 @@ nested_dia %>% unnest(param)
 ```
 
 
-### Approach 4
+### Approach 4 for Task 1
 
 * Create a nested data frame with `dplyr::group_by()` and `tidyr::nest()`.
 * Fit a linear model for each protein with `lm()` and `purrr::map()`.
@@ -368,25 +373,28 @@ nested_dia <- nested_dia %>%
 
 # Unnest data and additional manipulation
 nested_dia %>% unnest(param) %>% 
-    filter(grepl("run", term)) %>% 
-    mutate(term = gsub("run", "", term))
+    filter(str_detect(term, "run")) %>% 
+    mutate(term = str_replace(term, "run", ""))
 ```
 
-Compared to the previous approaches, Approach 4 with nested data frame allows to explore the data in a principle way.
+Compared to the previous approaches, Approach 4 with nested data frame allows to explore the data in a principled way.
 
 
-## Hypothesis testing to find differentially abundant proteins
+## Task 2: hypothesis testing to find differentially abundant proteins
 
 ```{r}
 # Run-level summarization
-run_dia <- nested_dia %>% unnest(param) %>% 
-    filter(grepl("run", term)) %>% 
-    mutate(term = gsub("run", "", term)) %>% 
+run_dia <- nested_dia %>% 
+    unnest(param) %>% 
+    filter(str_detect(term, "run")) %>% 
+    mutate(term = str_replace(term, "run", "")) %>% 
     select(protein, run = term, log2inty = estimate)
 run_dia
 
 # Design
-design <- twin_dia %>% select(run:visit) %>% distinct()
+design <- twin_dia %>% 
+    select(run:visit) %>% 
+    distinct()
 
 (run_dia2 <- run_dia %>% left_join(design))
 
@@ -412,7 +420,7 @@ diff_zyg %>%
 ```
 
 
-## Resources
+# Resources
 
 * R for Data Science, Hadley Wickham and Garrett Grolemund
     + http://r4ds.had.co.nz/iteration.html
@@ -420,4 +428,4 @@ diff_zyg %>%
 
 * Jenny Bryan's purrr tutorial: https://jennybc.github.io/purrr-tutorial/
 
-* broom on GitHub: https://github.com/tidyverse/broom
+* broom on CRAN: https://cran.r-project.org/web/packages/broom/index.html

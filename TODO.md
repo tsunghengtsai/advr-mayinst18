@@ -1,15 +1,9 @@
 # To-do list
 
-* Break wrangling and model sessions into three.
+* More model fitting, e.g., including additional effects?
 
-* Notion of split-apply-combine, row-wise work in a data frame, splitting vs. nesting, and list-columns in our context.
+* More on tibble: difference from data frame, list-columns, data frame is a special case of list, etc?
 
-* More model fitting, e.g., including additional effects.
-
-* More on tibble: difference from data frame, list-columns, data frame is a special case of list, etc.
-
-* Handling errors/warnings with purrr.
-
-* Programming with dplyr?
+* Handling errors/warnings with purrr?
 
 * Exercises?
