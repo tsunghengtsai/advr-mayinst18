@@ -224,8 +224,10 @@ sub1a %>% gather(key = run, value = intensity_h, -protein, -feature)
 Apply for both `sub1a` and `sub1b` and merge the results: 
 
 ```{r}
-tidy1a <- sub1a %>% gather(key = run, value = intensity_h, R001, R002, R003)
-tidy1b <- sub1b %>% gather(key = run, value = intensity_l, R001, R002, R003)
+tidy1a <- sub1a %>% 
+    gather(key = run, value = intensity_h, R001, R002, R003)
+tidy1b <- sub1b %>% 
+    gather(key = run, value = intensity_l, R001, R002, R003)
 merge(tidy1a, tidy1b)  # merge two parts of the dataset
 ```
 
@@ -388,7 +390,8 @@ twin_dia %>%
 We select only the last four columns to print the result:
 
 ```{r}
-twin_dia %>% filter(!is.na(intensity_h)) %>% 
+twin_dia %>% 
+    filter(!is.na(intensity_h)) %>% 
     select(subject:intensity_l)
 
 # Comma as AND operation

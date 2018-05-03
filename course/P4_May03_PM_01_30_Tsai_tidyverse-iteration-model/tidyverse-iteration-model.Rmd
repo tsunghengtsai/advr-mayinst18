@@ -287,7 +287,7 @@ nested_dia
 
 ```{r, eval=FALSE}
 # Same as
-nested_dia %>% 
+twin_dia2 %>% 
     nest(-protein)
 ```
 
